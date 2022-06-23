@@ -1,4 +1,4 @@
-package com.template.chucknorris.data.entities
+package com.template.chucknorris.data.entity
 
 data class JokeFromServer(
     var categories: List<String?>,
