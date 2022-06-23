@@ -6,8 +6,11 @@ import com.template.chucknorris.data.utils.ErrorHandlerImpl
 import com.template.chucknorris.domain.repository.JokeRepository
 import dagger.Binds
 import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 
 @Module
+@InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
     @Binds
     abstract fun getJokeRepositoryImpl(jokeRepositoryImpl: JokeRepositoryImpl): JokeRepository
