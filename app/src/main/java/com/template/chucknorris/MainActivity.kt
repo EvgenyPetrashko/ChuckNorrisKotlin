@@ -2,81 +2,60 @@ package com.template.chucknorris
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.*
-import com.template.chucknorris.data.JokeService
-import io.reactivex.Observable
-import io.reactivex.Observer
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
+import android.widget.Toast
+import androidx.activity.viewModels
+import com.template.chucknorris.databinding.ActivityMainBinding
+import com.template.chucknorris.domain.usecase.GetJokeUseCase
+import com.template.chucknorris.presentation.MainViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-
-    private var TAG = "MainActivity"
-    private var currentJokeLiked = false
-    private lateinit var jokeObservable: Observable<String>
-    private lateinit var jokeObserver: Observer<String>
-    private lateinit var jokeService: JokeService
+    private val mainViewModel by viewModels<MainViewModel>()
+    private var activityMainBinding: ActivityMainBinding? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        val rxBtn = findViewById<Button>(R.id.generateRandomJokeBtn)
-        jokeObserver = getObserver()
-
-        jokeService = JokeService()
-
-        rxBtn.setOnClickListener { startRStream() }
-
-    }
-
-    private fun startRStream(){
-        jokeObservable = jokeService.randomJoke
-
-        jokeObservable
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.io())
-            .subscribe(jokeObserver)
-
-    }
-
-    private fun getObserver(): Observer<String> {
-        return object: Observer<String>{
-            override fun onSubscribe(d: Disposable?) {
-                val loadingCard = View.inflate(this@MainActivity, R.layout.loading_joke_card, null)
-                val ll = findViewById<LinearLayout>(R.id.card_container)
-                ll.removeAllViews()
-                ll.addView(loadingCard)
-            }
-
-            override fun onNext(t: String?) {
-                Log.d(TAG, "onNext: $t")
-                val ll = findViewById<LinearLayout>(R.id.card_container)
-                ll.removeViewAt(0)
-                val jokeCard = View.inflate(this@MainActivity, R.layout.joke_card, null)
-                jokeCard.findViewById<TextView>(R.id.jokeText).text = t
-                jokeCard.findViewById<ImageButton>(R.id.jokeLikeButton).setOnClickListener {
-                    currentJokeLiked = !currentJokeLiked
-                    if (currentJokeLiked){
-                        (it as ImageButton).setImageResource(R.drawable.like_image_red)
-                    }else{
-                        (it as ImageButton).setImageResource(R.drawable.like_image_white)
-                    }
-                }
-                ll.addView(jokeCard)
-            }
-
-            override fun onError(e: Throwable?) {
-                Log.e(TAG, "onError: " + e?.message)
-                Toast.makeText(this@MainActivity, "ErrorDuringInternetRequest", Toast.LENGTH_SHORT).show()
-            }
-
-            override fun onComplete() {
-                Log.d(TAG, "onComplete")
-            }
-
+        val activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
+        this.activityMainBinding = activityMainBinding
+        setContentView(activityMainBinding.root)
+        activityMainBinding.generateRandomJokeBtn.setOnClickListener {
+            mainViewModel.loadJoke()
         }
+
+        mainViewModel.joke.observe(this) {
+            if (it != null) {
+                activityMainBinding.cardContainer.jokeText.text = it
+            }
+        }
+
+        mainViewModel.error.observe(this) {
+            if (it != null) {
+                Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        mainViewModel.loading.observe(this) {
+            changeCardVisibility(hidden = it)
+        }
+    }
+
+    private fun changeCardVisibility(hidden: Boolean) {
+        if (hidden) {
+            activityMainBinding?.cardContainer?.loadingIndicator?.visibility = View.VISIBLE
+            activityMainBinding?.cardContainer?.jokeText?.visibility = View.GONE
+            activityMainBinding?.cardContainer?.jokeTitle?.visibility = View.GONE
+        } else {
+            activityMainBinding?.cardContainer?.loadingIndicator?.visibility = View.GONE
+            activityMainBinding?.cardContainer?.jokeText?.visibility = View.VISIBLE
+            activityMainBinding?.cardContainer?.jokeTitle?.visibility = View.VISIBLE
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        activityMainBinding = null
     }
 }
