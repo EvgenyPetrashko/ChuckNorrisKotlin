@@ -1,6 +1,8 @@
 package com.template.chucknorris.data.utils
 
-class ErrorHandlerImpl: ErrorHandler {
+import javax.inject.Inject
+
+class ErrorHandlerImpl @Inject constructor(): ErrorHandler {
     override fun getError(throwable: Throwable): ErrorCause {
         return when (throwable){
             is java.io.IOException -> ErrorCause.NoInternetConnection
