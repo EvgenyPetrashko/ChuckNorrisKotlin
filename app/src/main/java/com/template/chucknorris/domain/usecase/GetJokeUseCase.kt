@@ -4,8 +4,9 @@ import com.template.chucknorris.data.utils.ErrorCause
 import com.template.chucknorris.data.utils.ResponseWrapper
 import com.template.chucknorris.domain.entity.JokeWrapper
 import com.template.chucknorris.domain.repository.JokeRepository
+import javax.inject.Inject
 
-class GetJokeUseCase constructor(private val jokeRepository: JokeRepository) {
+class GetJokeUseCase @Inject constructor(private val jokeRepository: JokeRepository) {
     suspend fun execute(): JokeWrapper {
         return when (val jokeFromServerWrapper = jokeRepository.getJoke()){
             is ResponseWrapper.Success -> JokeWrapper.Joke(value = jokeFromServerWrapper.data.value)

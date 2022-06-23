@@ -5,8 +5,9 @@ import com.template.chucknorris.data.entity.JokeFromServer
 import com.template.chucknorris.data.utils.ErrorHandler
 import com.template.chucknorris.data.utils.ResponseWrapper
 import com.template.chucknorris.domain.repository.JokeRepository
+import javax.inject.Inject
 
-class JokeRepositoryImpl constructor(
+class JokeRepositoryImpl @Inject constructor(
     private val jokeApi: JokeApi,
     private val errorHandler: ErrorHandler
 ) : JokeRepository {
