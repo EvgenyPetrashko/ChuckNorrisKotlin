@@ -1,6 +1,6 @@
-package com.template.chucknorris
+package com.template.chucknorris.data.entities
 
-data class Joke(
+data class JokeFromServer(
     var categories: List<String?>,
     var created_at: String,
     var icon_url: String,

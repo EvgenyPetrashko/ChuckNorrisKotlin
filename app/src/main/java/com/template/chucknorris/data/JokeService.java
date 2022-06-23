@@ -1,7 +1,8 @@
-package com.template.chucknorris;
+package com.template.chucknorris.data;
 
 
-import io.reactivex.Maybe;
+import com.template.chucknorris.data.entities.JokeFromServer;
+
 import io.reactivex.Observable;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -21,6 +22,6 @@ public class JokeService {
     }
 
     Observable<String> getRandomJoke(){
-        return jokeApi.randomJoke().map(Joke::getValue);
+        return jokeApi.randomJoke().map(JokeFromServer::getValue);
     }
 }
